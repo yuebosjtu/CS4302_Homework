@@ -15,14 +15,13 @@ void floyd_serial(int **A, int n) {
         }
     }
 }
-
 void floyd_parallel(int **A, int n, int num_threads) {
     // 改进的并行版本
     omp_set_num_threads(num_threads);
     
     for (int k = 0; k < n; k++) {
         // 并行化i循环，每个线程处理不同的行
-        #pragma omp parallel for schedule(dynamic, 10)
+        #pragma omp parallel for schedule(static) collapse(2)
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 if (A[i][k] != INF && A[k][j] != INF) {
