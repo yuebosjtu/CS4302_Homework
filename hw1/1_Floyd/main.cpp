@@ -25,14 +25,11 @@ int main(int argc, char *argv[]) {
     std::cout << "Number of threads: " << num_threads << std::endl;
     std::cout << "----------------------------------------\n";
     
-    // 分配并初始化矩阵
     int **matrix_serial = allocate_matrix(n);
     int **matrix_parallel = allocate_matrix(n);
     
-    // 生成随机图
     generate_random_graph(matrix_serial, n, density);
     
-    // 复制矩阵用于不同版本
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
             matrix_parallel[i][j] = matrix_serial[i][j];
@@ -44,7 +41,7 @@ int main(int argc, char *argv[]) {
         print_matrix(matrix_serial, n);
     }
 
-    // 并行版本测试
+    // test parallel version
     std::cout << "\nRunning parallel Floyd-Warshall with " << num_threads << " threads...\n";
     double start_time = get_time();
     floyd_parallel(matrix_parallel, n, num_threads);
@@ -62,13 +59,39 @@ int main(int argc, char *argv[]) {
     std::cout << "Parallel time: " << std::fixed << std::setprecision(6) 
               << parallel_time << " seconds\n";
     
-    // 计算加速比
+    // verify whether results match
+    bool results_match = true;
+    for (int i = 0; i < n && results_match; i++) {
+        for (int j = 0; j < n && results_match; j++) {
+            if (matrix_serial[i][j] != matrix_parallel[i][j]) {
+                results_match = false;
+                std::cout << "Mismatch found at position (" << i << ", " << j << "): "
+                          << "Serial = " << matrix_serial[i][j] 
+                          << ", Parallel = " << matrix_parallel[i][j] << std::endl;
+            }
+        }
+    }
+    
+    if (results_match) {
+        std::cout << "Results match! Serial and parallel versions produce identical results.\n";
+    } else {
+        std::cout << "Results do not match! There are differences between serial and parallel versions.\n";
+    }
+    
+    if (n <= 10) {
+        std::cout << "\nFinal result matrix (serial):\n";
+        print_matrix(matrix_serial, n);
+        std::cout << "\nFinal result matrix (parallel):\n";
+        print_matrix(matrix_parallel, n);
+    }
+    
+    // compute speedup
     double speedup = serial_time / parallel_time;
     
     std::cout << "\nPerformance Results:\n";
     std::cout << "Basic parallel speedup: " << std::fixed << std::setprecision(2) << speedup << "x";
+    std::cout << "\n";
     
-    // 清理内存
     free_matrix(matrix_serial, n);
     free_matrix(matrix_parallel, n);
     
