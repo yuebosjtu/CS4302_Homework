@@ -21,8 +21,16 @@ MONTE_TARGET = $(BUILD_DIR)/montecarlo.exe
 MONTE_SOURCES = $(MONTE_DIR)/main.cpp $(MONTE_SRC_DIR)/MonteCarlo.cpp
 MONTE_HEADERS = $(MONTE_INC_DIR)/MonteCarlo.h
 
+# Convolution project settings
+CONV_DIR = 3_Convolution
+CONV_SRC_DIR = $(CONV_DIR)/src
+CONV_INC_DIR = $(CONV_DIR)/include
+CONV_TARGET = $(BUILD_DIR)/convolution.exe
+CONV_SOURCES = $(CONV_DIR)/main.cpp $(CONV_SRC_DIR)/Convolution.cpp
+CONV_HEADERS = $(CONV_INC_DIR)/Convolution.h
+
 # Default target
-all: $(FLOYD_TARGET) $(MONTE_TARGET)
+all: $(FLOYD_TARGET) $(MONTE_TARGET) $(CONV_TARGET)
 
 # Create build directory if it doesn't exist
 $(BUILD_DIR):
@@ -36,10 +44,15 @@ $(FLOYD_TARGET): $(FLOYD_SOURCES) $(FLOYD_HEADERS) | $(BUILD_DIR)
 $(MONTE_TARGET): $(MONTE_SOURCES) $(MONTE_HEADERS) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -I$(MONTE_INC_DIR) -o $@ $(MONTE_SOURCES)
 
+# Convolution target
+$(CONV_TARGET): $(CONV_SOURCES) $(CONV_HEADERS) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -I$(CONV_INC_DIR) -o $@ $(CONV_SOURCES)
+
 # Individual targets
 floyd: $(FLOYD_TARGET)
 
 montecarlo: $(MONTE_TARGET)
+convolution: $(CONV_TARGET)
 
 # Clean target
 clean:
@@ -51,6 +64,9 @@ test-floyd: $(FLOYD_TARGET)
 
 test-montecarlo: $(MONTE_TARGET)
 	$(MONTE_TARGET) 1000000 4
+
+test-convolution: $(CONV_TARGET)
+	$(CONV_TARGET) 256 256 3 4
 
 test: test-floyd test-montecarlo
 
