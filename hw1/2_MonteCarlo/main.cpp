@@ -1,46 +1,48 @@
 #include "MonteCarlo.h"
-#include <iostream>
-#include <cstdlib>
 
-int main(int argc, char* argv[]) {
-    int samples = 1000000;  // 默认样本数
-    int threads = 4;        // 默认线程数
-    
-    // 解析命令行参数
-    if (argc >= 2) {
-        samples = atoi(argv[1]);
-    }
-    if (argc >= 3) {
-        threads = atoi(argv[2]);
-    }
-    
-    std::cout << "=== 蒙特卡洛方法计算π ===" << std::endl;
-    std::cout << "参数设置:" << std::endl;
-    std::cout << "  样本数: " << samples << std::endl;
-    std::cout << "  线程数: " << threads << std::endl;
-    std::cout << "  真实π值: 3.141592653589793" << std::endl;
-    std::cout << std::endl;
-    
-    // 运行测试
-    if (argc >= 4 && std::string(argv[3]) == "test") {
-        test_monte_carlo();
-    } else {
-        // 运行用户指定的配置
-        double pi_serial = monte_carlo_pi_serial(samples);
-        double pi_parallel = monte_carlo_pi_parallel(samples, threads);
-        double pi_improved = monte_carlo_pi_parallel_improved(samples, threads);
-        
-        std::cout << "计算结果:" << std::endl;
-        std::cout << "  串行版本:     " << pi_serial << std::endl;
-        std::cout << "  并行版本:     " << pi_parallel << std::endl;
-        std::cout << "  改进并行版本: " << pi_improved << std::endl;
-        std::cout << std::endl;
-        
-        std::cout << "误差分析:" << std::endl;
-        std::cout << "  串行误差:     " << abs(pi_serial - 3.141592653589793) << std::endl;
-        std::cout << "  并行误差:     " << abs(pi_parallel - 3.141592653589793) << std::endl;
-        std::cout << "  改进并行误差: " << abs(pi_improved - 3.141592653589793) << std::endl;
-    }
-    
-    return 0;
+#include <iostream>
+#include <iomanip>
+#include <omp.h>
+#include <chrono>
+
+int main(int argc, char** argv) {
+	int num_samples = 10000000; // default sample count
+	int num_threads = omp_get_max_threads(); // default thread count
+
+	if (argc > 1) {
+		num_samples = std::atoi(argv[1]);
+	}
+	if (argc > 2) {
+		num_threads = std::atoi(argv[2]);
+	}
+
+	std::cout << "Monte Carlo pi estimation\n";
+	std::cout << "samples: " << num_samples << ", threads: " << num_threads << "\n\n";
+
+	// serial
+	auto t0 = std::chrono::high_resolution_clock::now();
+	double pi_serial = monte_carlo_serial(num_samples);
+	auto t1 = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double> dur_serial = t1 - t0;
+
+	std::cout << "Serial: pi = " << pi_serial
+			  << ", time = " << dur_serial.count() << " s\n";
+
+	// parallel
+	omp_set_num_threads(num_threads);
+	auto t2 = std::chrono::high_resolution_clock::now();
+	double pi_parallel = monte_carlo_parallel(num_samples, num_threads);
+	auto t3 = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double> dur_parallel = t3 - t2;
+
+	std::cout << "Parallel: pi = " << pi_parallel
+			  << ", time = " << dur_parallel.count() << " s\n";
+
+	std::cout << "Speedup (serial / parallel) = ";
+	if (dur_parallel.count() > 0.0)
+		std::cout << (dur_serial.count() / dur_parallel.count()) << "\n";
+	else
+		std::cout << "inf\n";
+
+	return 0;
 }

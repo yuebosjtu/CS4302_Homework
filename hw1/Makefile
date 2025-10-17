@@ -1,78 +1,69 @@
-# Makefile for Floyd-Warshall project
-# Compatible with mingw32-make
+# Compiler settings
+CC = g++
+CFLAGS = -std=c++11 -O2 -Wall -fopenmp
 
-# Compiler and flags
-CXX = g++
-CXXFLAGS = -Wall -Wextra -O2 -std=c++11 -fopenmp
-INCLUDES = -I1_Floyd/include
-
-# Directories
-SRC_DIR = 1_Floyd/src
-BIN_DIR = bin
+# Build directories
 BUILD_DIR = build
 
-# Source files
-MAIN_SRC = 1_Floyd/main.cpp
-FLOYD_SRC = $(SRC_DIR)/floyd.cpp
-SOURCES = $(MAIN_SRC) $(FLOYD_SRC)
+# Floyd project settings
+FLOYD_DIR = 1_Floyd
+FLOYD_SRC_DIR = $(FLOYD_DIR)/src
+FLOYD_INC_DIR = $(FLOYD_DIR)/include
+FLOYD_TARGET = $(BUILD_DIR)/floyd.exe
+FLOYD_SOURCES = $(FLOYD_DIR)/main.cpp $(FLOYD_SRC_DIR)/floyd.cpp
+FLOYD_HEADERS = $(FLOYD_INC_DIR)/floyd.h $(FLOYD_INC_DIR)/utils.h
 
-# Object files
-MAIN_OBJ = $(BUILD_DIR)/main.o
-FLOYD_OBJ = $(BUILD_DIR)/floyd.o
-OBJECTS = $(MAIN_OBJ) $(FLOYD_OBJ)
-
-# Target executable
-TARGET = $(BIN_DIR)/floyd.exe
+# MonteCarlo project settings
+MONTE_DIR = 2_MonteCarlo
+MONTE_SRC_DIR = $(MONTE_DIR)/src
+MONTE_INC_DIR = $(MONTE_DIR)/include
+MONTE_TARGET = $(BUILD_DIR)/montecarlo.exe
+MONTE_SOURCES = $(MONTE_DIR)/main.cpp $(MONTE_SRC_DIR)/MonteCarlo.cpp
+MONTE_HEADERS = $(MONTE_INC_DIR)/MonteCarlo.h
 
 # Default target
-all: $(TARGET)
+all: $(FLOYD_TARGET) $(MONTE_TARGET)
 
-# Create directories if they don't exist
+# Create build directory if it doesn't exist
 $(BUILD_DIR):
-	@if not exist "$(BUILD_DIR)" mkdir "$(BUILD_DIR)"
+	@if not exist "$(BUILD_DIR)" md "$(BUILD_DIR)"
 
-$(BIN_DIR):
-	@if not exist "$(BIN_DIR)" mkdir "$(BIN_DIR)"
+# Floyd target
+$(FLOYD_TARGET): $(FLOYD_SOURCES) $(FLOYD_HEADERS) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -I$(FLOYD_INC_DIR) -o $@ $(FLOYD_SOURCES)
 
-# Link the final executable
-$(TARGET): $(OBJECTS) | $(BIN_DIR)
-	$(CXX) $(CXXFLAGS) -o $@ $(OBJECTS)
+# MonteCarlo target
+$(MONTE_TARGET): $(MONTE_SOURCES) $(MONTE_HEADERS) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -I$(MONTE_INC_DIR) -o $@ $(MONTE_SOURCES)
 
-# Compile main.cpp
-$(MAIN_OBJ): $(MAIN_SRC) | $(BUILD_DIR)
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
+# Individual targets
+floyd: $(FLOYD_TARGET)
 
-# Compile floyd.cpp
-$(FLOYD_OBJ): $(FLOYD_SRC) | $(BUILD_DIR)
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
+montecarlo: $(MONTE_TARGET)
 
-# Clean build files
+# Clean target
 clean:
-	@if exist "$(BUILD_DIR)" rmdir /s /q "$(BUILD_DIR)"
-	@if exist "$(BIN_DIR)" rmdir /s /q "$(BIN_DIR)"
+	if exist $(BUILD_DIR) rmdir /s /q $(BUILD_DIR)
 
-# Run the program (with default parameters)
-run: $(TARGET)
-	$(TARGET)
+# Test targets
+test-floyd: $(FLOYD_TARGET)
+	$(FLOYD_TARGET) 10 0.5 4
 
-# Run with custom parameters (matrix size, density, threads)
-# Usage: mingw32-make run-custom SIZE=200 DENSITY=0.5 THREADS=4
-run-custom: $(TARGET)
-	$(TARGET) $(SIZE) $(DENSITY) $(THREADS)
+test-montecarlo: $(MONTE_TARGET)
+	$(MONTE_TARGET) 1000000 4
 
-# Show help
+test: test-floyd test-montecarlo
+
+# Help target
 help:
 	@echo Available targets:
-	@echo   all      - Build the project (default)
-	@echo   clean    - Remove build files
-	@echo   run      - Run the program with default parameters
-	@echo   run-custom - Run with custom parameters
-	@echo   help     - Show this help message
-	@echo.
-	@echo Example usage:
-	@echo   mingw32-make
-	@echo   mingw32-make clean
-	@echo   mingw32-make run
-	@echo   mingw32-make run-custom SIZE=200 DENSITY=0.5 THREADS=4
+	@echo   all          - Build both projects (default)
+	@echo   floyd        - Build Floyd-Warshall project only
+	@echo   montecarlo   - Build Monte Carlo project only
+	@echo   test         - Run tests for both projects
+	@echo   test-floyd   - Test Floyd-Warshall with sample parameters
+	@echo   test-montecarlo - Test Monte Carlo with sample parameters
+	@echo   clean        - Remove build directory and executables
+	@echo   help         - Show this help message
 
-.PHONY: all clean run run-custom help
+.PHONY: all floyd montecarlo clean test test-floyd test-montecarlo help
