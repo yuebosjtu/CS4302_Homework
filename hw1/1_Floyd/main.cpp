@@ -3,9 +3,10 @@
 #include <omp.h>
 #include <iostream>
 #include <iomanip>
+#include <chrono>
 
 int main(int argc, char *argv[]) {
-    int n = 100;  // default graph size
+    int n = 1000;  // default graph size
     double density = 0.3;
     int num_threads = 4;
     
@@ -41,18 +42,20 @@ int main(int argc, char *argv[]) {
         print_matrix(matrix_serial, n);
     }
 
-    // test parallel version
-    std::cout << "\nRunning parallel Floyd-Warshall with " << num_threads << " threads...\n";
-    double start_time = get_time();
-    floyd_parallel(matrix_parallel, n, num_threads);
-    double parallel_time = get_time() - start_time;
-    
     // test serial version
     std::cout << "\nRunning serial Floyd-Warshall...\n";
-    start_time = get_time();
+    auto t0 = std::chrono::high_resolution_clock::now();
     floyd_serial(matrix_serial, n);
-    double serial_time = get_time() - start_time;
-    
+    auto t1 = std::chrono::high_resolution_clock::now();
+    double serial_time = std::chrono::duration<double>(t1 - t0).count();
+
+    // test parallel version
+    std::cout << "\nRunning parallel Floyd-Warshall with " << num_threads << " threads...\n";
+    auto t2 = std::chrono::high_resolution_clock::now();
+    floyd_parallel(matrix_parallel, n, num_threads);
+    auto t3 = std::chrono::high_resolution_clock::now();
+    double parallel_time = std::chrono::duration<double>(t3 - t2).count();
+
     std::cout << "Serial time: " << std::fixed << std::setprecision(6) 
               << serial_time << " seconds\n";  
 
