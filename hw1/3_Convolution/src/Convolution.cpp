@@ -61,12 +61,10 @@ void convolution_serial(double** input, int M, int N, double** filter, int K, do
     int output_rows = M - K + 1;
     int output_cols = N - K + 1;
     
-    // For each position in the output matrix
     for (int i = 0; i < output_rows; i++) {
         for (int j = 0; j < output_cols; j++) {
             double sum = 0.0;
             
-            // Apply filter (dot product)
             for (int fi = 0; fi < K; fi++) {
                 for (int fj = 0; fj < K; fj++) {
                     sum += input[i + fi][j + fj] * filter[fi][fj];

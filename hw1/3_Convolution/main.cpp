@@ -3,14 +3,12 @@
 #include <iostream>
 #include <iomanip>
 #include <chrono>
-#include <cstdlib>
-#include <ctime>
 
 int main(int argc, char *argv[]) {
-    int M = 256;  // default input matrix rows
-    int N = 256;  // default input matrix cols
-    int K = 3;    // default filter size (K x K)
-    int num_threads = 4;  // default number of threads
+    int M = 5000;  // default input matrix rows
+    int N = 5000;  // default input matrix cols
+    int K = 20;    // default filter size (K x K)
+    int num_threads = omp_get_max_threads();;  // default number of threads
     
     if (argc > 1) {
         M = atoi(argv[1]);
@@ -47,12 +45,6 @@ int main(int argc, char *argv[]) {
     // Initialize filter with random values
     initialize_random_matrix(filter, K, K, -1.0, 1.0);
     
-    // Print small matrices for verification
-    if (M <= 8 && N <= 8) {
-        print_matrix(input, M, N, "Input matrix");
-        print_matrix(filter, K, K, "Filter matrix");
-    }
-    
     // Run serial version
     std::cout << "\nRunning serial convolution...\n";
     auto t0 = std::chrono::high_resolution_clock::now();
@@ -84,23 +76,9 @@ int main(int argc, char *argv[]) {
         std::cout << "Results do not match! There are differences between serial and parallel versions.\n";
     }
     
-    // Print small output matrices for verification
-    if (M <= 8 && N <= 8) {
-        print_matrix(output_serial, M - K + 1, N - K + 1, "Output matrix (serial)");
-        print_matrix(output_parallel, M - K + 1, N - K + 1, "Output matrix (parallel)");
-    }
-    
     // Calculate and display speedup
     double speedup = serial_time / parallel_time;
     std::cout << "Speedup: " << std::fixed << std::setprecision(2) << speedup << "x\n";
-    
-    // Calculate throughput
-    long long operations = static_cast<long long>(M - K + 1) * (N - K + 1) * K * K;
-    std::cout << "Total operations: " << operations << std::endl;
-    std::cout << "Serial throughput: " << std::scientific << std::setprecision(2) 
-              << operations / serial_time << " ops/sec\n";
-    std::cout << "Parallel throughput: " << std::scientific << std::setprecision(2) 
-              << operations / parallel_time << " ops/sec\n";
     
     // Free memory
     free_matrix(input, M);

@@ -7,8 +7,8 @@
 
 int main(int argc, char *argv[]) {
     int n = 1000;  // default graph size
-    double density = 0.3;
-    int num_threads = 4;
+    double density = 0.3;  // default graph density
+    int num_threads = 4;  // default number of threads
     
     if (argc > 1) {
         n = atoi(argv[1]);
@@ -35,11 +35,6 @@ int main(int argc, char *argv[]) {
         for (int j = 0; j < n; j++) {
             matrix_parallel[i][j] = matrix_serial[i][j];
         }
-    }
-    
-    if (n <= 10) {
-        std::cout << "\nOriginal matrix:\n";
-        print_matrix(matrix_serial, n);
     }
 
     // test serial version
@@ -79,13 +74,6 @@ int main(int argc, char *argv[]) {
         std::cout << "Results match! Serial and parallel versions produce identical results.\n";
     } else {
         std::cout << "Results do not match! There are differences between serial and parallel versions.\n";
-    }
-    
-    if (n <= 10) {
-        std::cout << "\nFinal result matrix (serial):\n";
-        print_matrix(matrix_serial, n);
-        std::cout << "\nFinal result matrix (parallel):\n";
-        print_matrix(matrix_parallel, n);
     }
     
     // compute speedup

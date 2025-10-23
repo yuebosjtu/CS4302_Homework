@@ -34,7 +34,7 @@ all: $(FLOYD_TARGET) $(MONTE_TARGET) $(CONV_TARGET)
 
 # Create build directory if it doesn't exist
 $(BUILD_DIR):
-	@if not exist "$(BUILD_DIR)" md "$(BUILD_DIR)"
+	@mkdir -p $(BUILD_DIR)
 
 # Floyd target
 $(FLOYD_TARGET): $(FLOYD_SOURCES) $(FLOYD_HEADERS) | $(BUILD_DIR)
@@ -56,7 +56,7 @@ convolution: $(CONV_TARGET)
 
 # Clean target
 clean:
-	if exist $(BUILD_DIR) rmdir /s /q $(BUILD_DIR)
+	rm -rf $(BUILD_DIR)
 
 # Test targets
 test-floyd: $(FLOYD_TARGET)
