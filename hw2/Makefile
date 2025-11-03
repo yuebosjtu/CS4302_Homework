@@ -1,79 +1,42 @@
-# CUDA Compiler
+# CUDA Compiler settings
 NVCC = nvcc
+NVCCFLAGS = -O2 -arch=sm_50
 
-# Compiler flags
-NVCCFLAGS = -arch=sm_50 -O3
-
-# Detect OS
-ifeq ($(OS),Windows_NT)
-    RM = rmdir /s /q
-    EXE_EXT = .exe
-    SEP = \\
-else
-    RM = rm -rf
-    EXE_EXT =
-    SEP = /
-endif
-
-# Directories
+# Build directories
 BUILD_DIR = build
+
+# MatrixMul project settings
 MATRIXMUL_DIR = 1_MatrixMul
+MATRIXMUL_SRC_DIR = $(MATRIXMUL_DIR)/src
+MATRIXMUL_TARGET = $(BUILD_DIR)/MatrixMul.exe
+MATRIXMUL_SOURCES = $(MATRIXMUL_SRC_DIR)/MatrixMul.cu
+
+# ArraySum project settings
 ARRAYSUM_DIR = 2_ArraySum
+ARRAYSUM_SRC_DIR = $(ARRAYSUM_DIR)/src
+ARRAYSUM_TARGET = $(BUILD_DIR)/ArraySum.exe
+ARRAYSUM_SOURCES = $(ARRAYSUM_SRC_DIR)/ArraySum.cu
 
-# Source files
-MATRIXMUL_SRC = $(MATRIXMUL_DIR)$(SEP)src$(SEP)MatrixMul.cu
-ARRAYSUM_SRC = $(ARRAYSUM_DIR)$(SEP)src$(SEP)ArraySum.cu
-
-# Executable files
-MATRIXMUL_BIN = $(BUILD_DIR)$(SEP)MatrixMul$(EXE_EXT)
-ARRAYSUM_BIN = $(BUILD_DIR)$(SEP)ArraySum$(EXE_EXT)
-
-# Default target: build all
-all: $(BUILD_DIR) $(MATRIXMUL_BIN) $(ARRAYSUM_BIN)
+# Default target
+all: $(MATRIXMUL_TARGET) $(ARRAYSUM_TARGET)
 
 # Create build directory if it doesn't exist
 $(BUILD_DIR):
-	@mkdir -p $(BUILD_DIR)
+	@powershell -Command "if (!(Test-Path '$(BUILD_DIR)')) { New-Item -ItemType Directory -Path '$(BUILD_DIR)' | Out-Null }"
 
-# Build MatrixMul
-$(MATRIXMUL_BIN): $(MATRIXMUL_SRC)
-	$(NVCC) $(NVCCFLAGS) $< -o $@
-	@echo "MatrixMul compiled successfully!"
+# MatrixMul target
+$(MATRIXMUL_TARGET): $(MATRIXMUL_SOURCES) | $(BUILD_DIR)
+	@powershell -Command "if (!(Test-Path '$(BUILD_DIR)')) { New-Item -ItemType Directory -Path '$(BUILD_DIR)' | Out-Null }"
+	$(NVCC) $(NVCCFLAGS) -o $@ $(MATRIXMUL_SOURCES)
 
-# Build ArraySum
-$(ARRAYSUM_BIN): $(ARRAYSUM_SRC)
-	$(NVCC) $(NVCCFLAGS) $< -o $@
-	@echo "ArraySum compiled successfully!"
+# ArraySum target
+$(ARRAYSUM_TARGET): $(ARRAYSUM_SOURCES) | $(BUILD_DIR)
+	@powershell -Command "if (!(Test-Path '$(BUILD_DIR)')) { New-Item -ItemType Directory -Path '$(BUILD_DIR)' | Out-Null }"
+	$(NVCC) $(NVCCFLAGS) -o $@ $(ARRAYSUM_SOURCES)
 
-# Run MatrixMul
-run-matrixmul: $(MATRIXMUL_BIN)
-	@echo "Running MatrixMul..."
-	$(MATRIXMUL_BIN)
-
-# Run ArraySum
-run-arraysum: $(ARRAYSUM_BIN)
-	@echo "Running ArraySum..."
-	$(ARRAYSUM_BIN)
-
-# Run all programs
-run-all: run-matrixmul run-arraysum
-
-# Clean build directory
+# Clean target
 clean:
-	@$(RM) $(BUILD_DIR) 2>nul || echo "Build directory already clean"
+	rm -rf $(BUILD_DIR)
 
-# Rebuild everything
-rebuild: clean all
-
-# Help target
-help:
-	@echo "Available targets:"
-	@echo "  all           - Build all programs (default)"
-	@echo "  clean         - Remove build directory"
-	@echo "  rebuild       - Clean and build all"
-	@echo "  run-matrixmul - Build and run MatrixMul"
-	@echo "  run-arraysum  - Build and run ArraySum"
-	@echo "  run-all       - Build and run all programs"
-	@echo "  help          - Show this help message"
-
-.PHONY: all clean rebuild run-matrixmul run-arraysum run-all help
+# Phony targets
+.PHONY: all clean

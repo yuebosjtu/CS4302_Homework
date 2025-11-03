@@ -236,20 +236,6 @@ int main() {
     validateResults(h_C_opt1, h_C_cpu, M, N, "Optimized");
     printf("\n");
 
-    // Performance Summary
-    printf("==========================================================\n");
-    printf("=== Performance Summary ===\n");
-    printf("==========================================================\n");
-    printf("CPU time:         %.2f ms\n", cpu_time);
-    printf("GPU Basic time:   %.2f ms (%.2fx speedup vs CPU)\n", basic_time, cpu_time / basic_time);
-    printf("GPU Optimized: %.2f ms (%.2fx speedup vs CPU, %.2fx vs Basic)\n", 
-           gpu_time, cpu_time / gpu_time, basic_time / gpu_time);
-    printf("==========================================================\n");
-    printf("\nOptimizations applied:\n");
-    printf("1. Bank Conflict Avoidance: Added padding to shared memory arrays\n");
-    printf("2. Loop Unrolling: Unrolled inner loop by factor of 4\n");
-    printf("==========================================================\n");
-
     cudaEventDestroy(start);
     cudaEventDestroy(stop);
 
