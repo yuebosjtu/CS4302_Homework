@@ -98,7 +98,7 @@ int main() {
     cudaMalloc((void**)&d_B, size_B);
     cudaMalloc((void**)&d_C, size_C);
 
-    // ============ CPU Matrix Multiplication ============
+    // CPU Matrix Multiplication
     printf("Matrix dimensions: A(%d x %d) * B(%d x %d) = C(%d x %d)\n", M, K, K, N, M, N);
     printf("\n=== CPU Matrix Multiplication ===\n");
     
@@ -109,7 +109,7 @@ int main() {
     double cpu_time = ((double)(cpu_end - cpu_start)) / CLOCKS_PER_SEC * 1000.0;
     printf("CPU execution time: %.2f ms\n", cpu_time);
 
-    // ============ GPU Matrix Multiplication ============
+    // GPU Matrix Multiplication
     printf("\n=== GPU Matrix Multiplication ===\n");
     
     cudaMemcpy(d_A, h_A, size_A, cudaMemcpyHostToDevice);
@@ -132,13 +132,13 @@ int main() {
     printf("GPU execution time: %.2f ms\n", gpu_time);
 
     cudaMemcpy(h_C, d_C, size_C, cudaMemcpyDeviceToHost);
-    
-    // ============ Performance Comparison ============
+
+    // Performance Comparison
     printf("\n=== Performance Comparison ===\n");
     printf("Speedup (CPU/GPU): %.2fx\n", cpu_time / gpu_time);
     printf("GPU is %.2f%% faster than CPU\n", (1 - gpu_time / cpu_time) * 100);
 
-    // ============ Validate Results ============
+    // Validate Results
     printf("\n=== Validating Results ===\n");
     bool results_match = true;
     int mismatch_count = 0;
@@ -163,17 +163,14 @@ int main() {
         fprintf(stderr, "Results mismatch! Total mismatches: %d\n", mismatch_count);
     }
 
-    // Free device memory
     cudaFree(d_A);
     cudaFree(d_B);
     cudaFree(d_C);
 
-    // Free host memory
     free(h_A);
     free(h_B);
     free(h_C);
     free(h_C_cpu);
-
-    printf("\nTile-based matrix multiplication completed successfully!\n");
+    
     return 0;
 }
