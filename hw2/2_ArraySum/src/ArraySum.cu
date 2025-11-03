@@ -469,16 +469,6 @@ int main() {
         cudaFree(d_result);
     }
     
-    // Summary
-    printf("========== Summary ==========\n");
-    printf("All optimizations applied:\n");
-    printf("1. Bank conflict avoidance (padded shared memory)\n");
-    printf("2. Warp divergence reduction (sequential addressing)\n");
-    printf("3. Loop unrolling (last warp unrolling)\n");
-    printf("4. Multiple elements per thread (reduced blocks)\n");
-    printf("5. Fully unrolled reduction loops\n");
-    printf("==============================\n");
-    
     // Free device memory
     cudaFree(d_input);
     
